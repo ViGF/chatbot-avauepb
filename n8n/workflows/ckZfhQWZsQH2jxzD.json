@@ -1,8 +1,8 @@
 {
-    "updatedAt": "2026-08-18T16:30:47.781Z",
+    "updatedAt": "2026-08-18T17:03:01.663Z",
     "createdAt": "2026-08-18T13:05:49.126Z",
     "id": "ckZfhQWZsQH2jxzD",
-    "name": "Subwrokflow: Sync GD Folder (Delete) - Vector DB Delete Files",
+    "name": "Schedule: Sync GD Folder (Delete) - Vector DB Delete Files",
     "description": null,
     "active": false,
     "isArchived": false,
@@ -81,25 +81,6 @@
         },
         {
             "parameters": {
-                "workflowInputs": {
-                    "values": [
-                        {
-                            "name": "folderId"
-                        }
-                    ]
-                }
-            },
-            "id": "e36ba76c-f531-4f7b-b10d-d946ee7fd324",
-            "typeVersion": 1.1,
-            "name": "Start",
-            "type": "n8n-nodes-base.executeWorkflowTrigger",
-            "position": [
-                288,
-                -816
-            ]
-        },
-        {
-            "parameters": {
                 "resource": "fileFolder",
                 "filter": {
                     "folderId": {
@@ -140,7 +121,7 @@
             "typeVersion": 1.3,
             "position": [
                 288,
-                -656
+                -640
             ],
             "id": "0db381f4-9424-4d0f-ab26-d9b591970f44",
             "name": "Schedule Trigger"
@@ -174,22 +155,6 @@
                 [
                     {
                         "node": "Delete Removed Documents",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        },
-        "Start": {
-            "main": [
-                [
-                    {
-                        "node": "List folder files",
-                        "type": "main",
-                        "index": 0
-                    },
-                    {
-                        "node": "List Vector File IDs",
                         "type": "main",
                         "index": 0
                     }
@@ -235,9 +200,9 @@
     },
     "nodeGroups": [],
     "pinData": {},
-    "versionId": "f96f3903-c639-475d-a2d1-9246238f5609",
+    "versionId": "7834398e-77a8-4e62-bf64-48728a3955cb",
     "activeVersionId": null,
-    "versionCounter": 81,
+    "versionCounter": 83,
     "triggerCount": 0,
     "sourceWorkflowId": null,
     "tags": [],
