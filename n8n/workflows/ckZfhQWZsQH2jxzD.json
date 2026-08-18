@@ -1,0 +1,268 @@
+{
+    "updatedAt": "2026-08-18T16:30:47.781Z",
+    "createdAt": "2026-08-18T13:05:49.126Z",
+    "id": "ckZfhQWZsQH2jxzD",
+    "name": "Subwrokflow: Sync GD Folder (Delete) - Vector DB Delete Files",
+    "description": null,
+    "active": false,
+    "isArchived": false,
+    "nodes": [
+        {
+            "parameters": {
+                "operation": "executeQuery",
+                "query": "SELECT DISTINCT metadata->>'fileId' AS \"fileId\" FROM n8n_vectors WHERE metadata->>'fileId' IS NOT NULL;",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.postgres",
+            "typeVersion": 2.5,
+            "position": [
+                592,
+                -528
+            ],
+            "id": "8d90483e-99a3-4f25-9f5e-995efb0f0cf9",
+            "name": "List Vector File IDs",
+            "credentials": {
+                "postgres": {
+                    "id": "N9pRtFBvYwoEfrhe",
+                    "name": "Postgres account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "mode": "combine",
+                "combineBy": "combineByPosition",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.merge",
+            "typeVersion": 3.2,
+            "position": [
+                848,
+                -624
+            ],
+            "id": "e9a20642-af81-4081-b32d-ab933130e0cb",
+            "name": "Compare Drive and PGVector"
+        },
+        {
+            "parameters": {
+                "jsCode": "const driveIds = new Set($('List folder files').all().map(item => item.json.id));\n\nconst vectorItems = $('List Vector File IDs').all();\n\nreturn vectorItems\n  .map(item => item.json.fileId)\n  .filter(fileId => fileId && !driveIds.has(fileId))\n  .map(fileId => ({ json: { fileId } }));"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1072,
+                -624
+            ],
+            "id": "17f5b879-b99b-4ae7-ab3f-55927716f865",
+            "name": "Find Deleted Documents"
+        },
+        {
+            "parameters": {
+                "operation": "executeQuery",
+                "query": "DELETE FROM n8n_vectors WHERE metadata->>'fileId' = $1;",
+                "options": {
+                    "queryReplacement": "={{ $json.fileId }}"
+                }
+            },
+            "type": "n8n-nodes-base.postgres",
+            "typeVersion": 2.5,
+            "position": [
+                1280,
+                -624
+            ],
+            "id": "ac65d01b-2190-42e3-985d-42e48459f7dc",
+            "name": "Delete Removed Documents",
+            "credentials": {
+                "postgres": {
+                    "id": "N9pRtFBvYwoEfrhe",
+                    "name": "Postgres account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "workflowInputs": {
+                    "values": [
+                        {
+                            "name": "folderId"
+                        }
+                    ]
+                }
+            },
+            "id": "e36ba76c-f531-4f7b-b10d-d946ee7fd324",
+            "typeVersion": 1.1,
+            "name": "Start",
+            "type": "n8n-nodes-base.executeWorkflowTrigger",
+            "position": [
+                288,
+                -816
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "fileFolder",
+                "filter": {
+                    "folderId": {
+                        "__rl": true,
+                        "value": "11bsfuCRCTODrpz-aFwwZLd7FVcOXCUK5",
+                        "mode": "id"
+                    },
+                    "includeTrashed": false
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.googleDrive",
+            "typeVersion": 3,
+            "position": [
+                592,
+                -720
+            ],
+            "id": "c6df7b6d-452f-4325-b712-1715dce7565a",
+            "name": "List folder files",
+            "credentials": {
+                "googleDriveOAuth2Api": {
+                    "id": "RAKtIBFNVXIg9hae",
+                    "name": "Google Drive account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "field": "minutes"
+                        }
+                    ]
+                }
+            },
+            "type": "n8n-nodes-base.scheduleTrigger",
+            "typeVersion": 1.3,
+            "position": [
+                288,
+                -656
+            ],
+            "id": "0db381f4-9424-4d0f-ab26-d9b591970f44",
+            "name": "Schedule Trigger"
+        }
+    ],
+    "connections": {
+        "List Vector File IDs": {
+            "main": [
+                [
+                    {
+                        "node": "Compare Drive and PGVector",
+                        "type": "main",
+                        "index": 1
+                    }
+                ]
+            ]
+        },
+        "Compare Drive and PGVector": {
+            "main": [
+                [
+                    {
+                        "node": "Find Deleted Documents",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Find Deleted Documents": {
+            "main": [
+                [
+                    {
+                        "node": "Delete Removed Documents",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Start": {
+            "main": [
+                [
+                    {
+                        "node": "List folder files",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "List Vector File IDs",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "List folder files": {
+            "main": [
+                [
+                    {
+                        "node": "Compare Drive and PGVector",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Schedule Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "List folder files",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "List Vector File IDs",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1",
+        "availableInMCP": false,
+        "binaryMode": "separate"
+    },
+    "staticData": null,
+    "meta": {
+        "templateCredsSetupCompleted": true
+    },
+    "nodeGroups": [],
+    "pinData": {},
+    "versionId": "f96f3903-c639-475d-a2d1-9246238f5609",
+    "activeVersionId": null,
+    "versionCounter": 81,
+    "triggerCount": 0,
+    "sourceWorkflowId": null,
+    "tags": [],
+    "shared": [
+        {
+            "updatedAt": "2026-08-18T13:05:49.126Z",
+            "createdAt": "2026-08-18T13:05:49.126Z",
+            "role": "workflow:owner",
+            "workflowId": "ckZfhQWZsQH2jxzD",
+            "projectId": "QdELh5DcgvyCSwqD",
+            "project": {
+                "updatedAt": "2026-08-10T14:01:52.138Z",
+                "createdAt": "2026-08-10T13:56:09.584Z",
+                "id": "QdELh5DcgvyCSwqD",
+                "name": "Vitório Gomes <vitoriogdef@gmail.com>",
+                "type": "personal",
+                "icon": null,
+                "description": null,
+                "customTelemetryTags": [],
+                "creatorId": "35346622-3206-476e-be38-c3c56f29550f"
+            }
+        }
+    ],
+    "versionMetadata": {
+        "name": null,
+        "description": null
+    }
+}
